@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Budget Planner</title>
+<meta name="theme-color" content="#1E2A38">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --ink:#1E2A38; --ink-soft:#45566B; --paper:#FAF7F0; --paper-raised:#FFFFFF;
+  --line:#DDD6C6; --green:#3F6E52; --green-tint:#E6EEE8; --rust:#B3492D; --rust-tint:#F7E7E1;
+  --gold:#B7893F; --gold-tint:#F3E9D6; --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#161B22; --paper-raised:#1E252E; --line:#333c48; --ink:#EDEBE3; --ink-soft:#9aa7b5; }
+}
+:root[data-theme="dark"]{ --paper:#161B22; --paper-raised:#1E252E; --line:#333c48; --ink:#EDEBE3; --ink-soft:#9aa7b5; }
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;min-height:100%;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0 0 4px 0;color:var(--ink);}
+.figure{font-variant-numeric:tabular-nums;}
+button,input,select{font-family:var(--sans);font-size:14px;}
+.hidden{display:none !important;}
+
+.home-shell{min-height:100vh;display:flex;flex-direction:column;}
+.home-nav{display:flex;justify-content:space-between;align-items:center;padding:22px 44px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:12px;}
+.home-nav .mark{font-family:var(--serif);font-size:19px;font-weight:600;}
+.home-nav .actions{display:flex;gap:10px;}
+.home-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:64px 24px 56px;}
+.home-hero h1{font-size:38px;max-width:620px;line-height:1.2;}
+.home-hero p{color:var(--ink-soft);max-width:520px;margin:16px 0 30px;font-size:16px;}
+.home-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.home-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.feature-card{background:var(--paper-raised);padding:30px 28px;}
+.feature-card .icon{font-size:22px;margin-bottom:10px;}
+.feature-card h3{font-size:15px;margin-bottom:6px;}
+.feature-card p{color:var(--ink-soft);font-size:13.5px;margin:0;line-height:1.5;}
+.home-footer{text-align:center;padding:22px;color:var(--ink-soft);font-size:12.5px;}
+.back-link{display:inline-block;margin-bottom:18px;font-size:13px;color:var(--ink-soft);text-decoration:none;cursor:pointer;}
+.back-link:hover{color:var(--ink);}
+.auth-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;}
+.auth-card{width:100%;max-width:420px;background:var(--paper-raised);border:1px solid var(--line);padding:40px 36px;}
+.auth-mark{font-family:var(--serif);font-size:15px;color:var(--ink-soft);margin-bottom:6px;}
+.auth-card h1{font-size:28px;}
+.auth-sub{color:var(--ink-soft);margin-bottom:28px;font-size:14px;}
+.tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:24px;}
+.tabs button{flex:1;padding:10px 0;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-soft);cursor:pointer;font-size:14px;}
+.tabs button.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;}
+.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);}
+.field input:focus,.field select:focus{outline:2px solid var(--ink);outline-offset:1px;}
+.btn{display:inline-block;padding:11px 20px;background:var(--ink);color:var(--paper);border:1px solid var(--ink);cursor:pointer;font-size:14px;font-weight:500;text-align:center;}
+.btn:hover{opacity:0.9;}
+.btn.block{width:100%;}
+.btn.ghost{background:transparent;color:var(--ink);}
+.btn.ghost:hover{background:var(--line);}
+.btn.switch{background:#000;border-color:#000;color:#fff;}
+.btn.switch:hover{background:#222;border-color:#222;}
+.btn.small{padding:6px 12px;font-size:13px;}
+.form-note{margin-top:18px;font-size:13.5px;color:var(--ink-soft);text-align:center;}
+.form-note a{color:var(--ink);text-decoration:underline;cursor:pointer;}
+.error-msg{background:var(--rust-tint);color:var(--rust);padding:10px 12px;font-size:13.5px;margin-bottom:16px;display:none;}
+.error-msg.show{display:block;}
+.hint-box{margin-top:24px;padding:12px 14px;border:1px dashed var(--line);font-size:12.5px;color:var(--ink-soft);}
+
+.app-shell{display:flex;min-height:100vh;}
+.rail{width:220px;flex-shrink:0;background:var(--ink);color:#DCE3EA;padding:28px 20px;display:flex;flex-direction:column;padding-top:calc(28px + env(safe-area-inset-top,0px));}
+.rail-mark{font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:2px;}
+.rail-sub{font-size:11.5px;color:#8A9AAC;margin-bottom:36px;}
+.rail nav{display:flex;flex-direction:column;gap:2px;}
+.rail nav a{display:block;padding:9px 10px;text-decoration:none;color:#B7C2CE;font-size:14px;border-left:2px solid transparent;cursor:pointer;}
+.rail nav a:hover{color:#fff;}
+.rail nav a.active{color:#fff;border-left-color:var(--gold);background:rgba(255,255,255,0.04);}
+.rail-user{margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,0.12);font-size:13px;}
+.rail-user .name{color:#fff;margin-bottom:2px;}
+.rail-user .role{color:#8A9AAC;font-size:11.5px;margin-bottom:12px;}
+.main{flex:1;padding:36px 44px;max-width:1100px;overflow-x:auto;}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;border-bottom:1px solid var(--line);padding-bottom:18px;flex-wrap:wrap;gap:10px;}
+.page-head p{color:var(--ink-soft);margin:4px 0 0 0;font-size:14px;}
+
+.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:28px;}
+.summary-cell{background:var(--paper-raised);padding:18px 20px;}
+.summary-cell .label{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;}
+.summary-cell .value{font-family:var(--serif);font-size:26px;}
+.summary-cell .value.green{color:var(--green);}
+.summary-cell .value.rust{color:var(--rust);}
+.summary-cell .value.gold{color:var(--gold);}
+
+.alert{padding:13px 16px;margin-bottom:22px;font-size:14px;border-left:3px solid var(--rust);background:var(--rust-tint);color:#7A3220;}
+.alert.ok{border-left-color:var(--green);background:var(--green-tint);color:#274837;}
+.alert strong{display:block;margin-bottom:2px;}
+
+.panel{background:var(--paper-raised);border:1px solid var(--line);padding:24px 26px;margin-bottom:24px;}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px;}
+.panel-head h2{font-size:17px;}
+.two-col{display:grid;grid-template-columns:1.1fr 1.4fr;gap:24px;align-items:start;}
+@media (max-width:860px){.two-col{grid-template-columns:1fr;} .app-shell{flex-direction:column;} .rail{width:100%;} .main{padding:24px;}}
+
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);font-weight:600;}
+tr:last-child td{border-bottom:none;}
+td.amt-income{color:var(--green);}
+td.amt-expense{color:var(--rust);}
+td.actions{text-align:right;white-space:nowrap;}
+td.actions button{background:none;border:none;cursor:pointer;color:var(--ink-soft);font-size:13px;text-decoration:underline;padding:2px 6px;}
+td.actions button:hover{color:var(--ink);}
+.empty-row td{color:var(--ink-soft);text-align:center;padding:24px 0;}
+
+.inline-form{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end;}
+@media (max-width:900px){.inline-form{grid-template-columns:repeat(2,1fr);}}
+.inline-form .field{margin-bottom:0;}
+.inline-form .field label{margin-bottom:4px;}
+.inline-form button{height:40px;}
+.filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filters select{padding:8px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);}
+
+.cat-list{display:flex;flex-direction:column;gap:12px;}
+.cat-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.cat-swatch{width:10px;height:10px;flex-shrink:0;display:inline-block;}
+.cat-name{width:110px;font-size:13.5px;flex-shrink:0;}
+.cat-bar-track{flex:1;min-width:60px;height:8px;background:var(--line);position:relative;}
+.cat-bar-fill{height:100%;background:var(--ink);}
+.cat-bar-fill.over{background:var(--rust);}
+.cat-amt{width:130px;text-align:right;font-size:13px;color:var(--ink-soft);flex-shrink:0;}
+
+.progress-track{width:100%;height:14px;background:var(--line);margin:10px 0;}
+.progress-fill{height:100%;background:var(--green);}
+.progress-fill.over{background:var(--rust);}
+
+.chart-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;}
+.legend{display:flex;flex-direction:column;gap:8px;font-size:13.5px;}
+.legend .row{display:flex;align-items:center;gap:8px;}
+.legend .sw{width:10px;height:10px;flex-shrink:0;}
+.chip{display:inline-block;padding:3px 9px;font-size:11.5px;background:var(--gold-tint);color:#7A5A20;}
+.muted{color:var(--ink-soft);}
+.right{text-align:right;}
+
+</style>
+</head>
+<body>
+
+<!-- ================= HOME VIEW ================= -->
+<div id="view-home" class="home-shell">
+  <div class="home-nav">
+    <div class="mark">Budget Planner</div>
+    <div class="actions">
+      <button type="button" class="btn ghost small" data-nav="login">Sign in</button>
+      <button type="button" class="btn switch small" data-nav="register">Create account</button>
+    </div>
+  </div>
+  <div class="home-hero">
+    <h1>Know where every rupee goes.</h1>
+    <p>Track income and expenses, set savings goals, and catch overspending before it happens — a simple ledger for your everyday finances.</p>
+    <div class="home-cta">
+      <button type="button" class="btn" data-nav="register">Get started — it's free</button>
+      <button type="button" class="btn ghost" data-nav="login">I already have an account</button>
+    </div>
+  </div>
+  <div class="home-features">
+    <div class="feature-card"><div class="icon">📊</div><h3>Visual spending breakdown</h3><p>A category-by-category pie chart shows exactly where your money went this month.</p></div>
+    <div class="feature-card"><div class="icon">🎯</div><h3>Savings goals</h3><p>Set a monthly target and track real-time progress as income and expenses come in.</p></div>
+    <div class="feature-card"><div class="icon">🔔</div><h3>Overspend alerts</h3><p>Get a clear warning the moment a category — or your whole budget — goes over.</p></div>
+    <div class="feature-card"><div class="icon">🛠️</div><h3>Admin controls</h3><p>Admins manage categories, spending caps, and every registered user from one dashboard.</p></div>
+  </div>
+  <div class="home-footer">Demo admin login — admin@budget.com / admin123</div>
+</div>
+
+<!-- ================= LOGIN VIEW ================= -->
+<div id="view-login" class="auth-shell hidden">
+  <div class="auth-card">
+    <a class="back-link" data-nav="home">&larr; Back to home</a>
+    <div class="auth-mark">Budget Planner</div>
+    <h1>Sign in</h1>
+    <p class="auth-sub">Keep your income, spending, and savings goals in one ledger.</p>
+    <div class="tabs">
+      <button type="button" id="tabUser">User</button>
+      <button type="button" id="tabAdmin">Admin</button>
+    </div>
+    <div class="error-msg" id="loginError"></div>
+    <form id="loginForm">
+      <input type="hidden" id="loginRole" value="user">
+      <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required placeholder="you@example.com"></div>
+      <div class="field"><label for="loginPassword">Password</label><input type="password" id="loginPassword" required placeholder="••••••••"></div>
+      <button type="submit" class="btn block">Sign in</button>
+    </form>
+    <p class="form-note">New here? <a id="goRegister">Create a user account</a></p>
+    <div class="hint-box">Demo admin login — email <strong>admin@budget.com</strong>, password <strong>admin123</strong>.</div>
+  </div>
+</div>
+
+<!-- ================= REGISTER VIEW ================= -->
+<div id="view-register" class="auth-shell hidden">
+  <div class="auth-card">
+    <a class="back-link" data-nav="home">&larr; Back to home</a>
+    <div class="auth-mark">Budget Planner</div>
+    <h1>Create your account</h1>
+    <p class="auth-sub">Set up a personal ledger for income, expenses, and goals.</p>
+    <div class="error-msg" id="registerError"></div>
+    <form id="registerForm">
+      <div class="field"><label for="regName">Full name</label><input type="text" id="regName" required placeholder="Asha Rao"></div>
+      <div class="field"><label for="regEmail">Email</label><input type="email" id="regEmail" required placeholder="you@example.com"></div>
+      <div class="field"><label for="regPassword">Password</label><input type="password" id="regPassword" required placeholder="At least 4 characters"></div>
+      <div class="field"><label for="regIncome">Average monthly income (optional)</label><input type="number" id="regIncome" min="0" placeholder="e.g. 40000"></div>
+      <button type="submit" class="btn block">Create account</button>
+    </form>
+    <p class="form-note">Already registered? <a id="goLogin">Sign in</a></p>
+  </div>
+</div>
+
+<!-- ================= USER DASHBOARD ================= -->
+<div id="view-dashboard" class="app-shell hidden">
+  <aside class="rail">
+    <div class="rail-mark">Budget Planner</div>
+    <div class="rail-sub">User module</div>
+    <nav>
+      <a data-nav="dashboard" class="active">Overview</a>
+      <a data-nav="transactions">Transactions</a>
+      <a data-nav="goals">Goals &amp; summary</a>
+    </nav>
+    <div class="rail-user"><div class="name" data-badge-name>—</div><div class="role" data-badge-role>—</div><button class="btn switch small block" data-logout>Switch Account</button></div>
+  </aside>
+  <main class="main">
+    <div class="page-head"><div><h1>This month's overview</h1><p>Where your money came from, and where it went.</p></div></div>
+    <div id="overspendAlert" class="alert"></div>
+    <div class="summary-row">
+      <div class="summary-cell"><div class="label">Income</div><div class="value figure green" id="cardIncome">—</div></div>
+      <div class="summary-cell"><div class="label">Expenses</div><div class="value figure rust" id="cardExpense">—</div></div>
+      <div class="summary-cell"><div class="label">Balance</div><div class="value figure" id="cardBalance">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="panel"><div class="panel-head"><h2>Spending by category</h2></div>
+        <div class="chart-wrap"><canvas id="spendChart" width="170" height="170"></canvas><div class="legend" id="spendLegend"></div></div>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>Category budgets</h2></div><div class="cat-list" id="catBudgetList"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Recent transactions</h2><a class="btn ghost small" data-nav="transactions">Add / manage</a></div>
+      <table><thead><tr><th>Date</th><th>Category</th><th>Note</th><th class="right">Amount</th></tr></thead><tbody id="recentTxBody"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<!-- ================= TRANSACTIONS ================= -->
+<div id="view-transactions" class="app-shell hidden">
+  <aside class="rail">
+    <div class="rail-mark">Budget Planner</div>
+    <div class="rail-sub">User module</div>
+    <nav>
+      <a data-nav="dashboard">Overview</a>
+      <a data-nav="transactions" class="active">Transactions</a>
+      <a data-nav="goals">Goals &amp; summary</a>
+    </nav>
+    <div class="rail-user"><div class="name" data-badge-name>—</div><div class="role" data-badge-role>—</div><button class="btn switch small block" data-logout>Switch Account</button></div>
+  </aside>
+  <main class="main">
+    <div class="page-head"><div><h1>Transactions</h1><p>Log income and expenses, then filter to find anything.</p></div></div>
+    <div class="panel">
+      <div class="panel-head"><h2 id="formTitle">Add a transaction</h2></div>
+      <form id="txForm" class="inline-form">
+        <div class="field"><label for="txType">Type</label><select id="txType"><option value="expense">Expense</option><option value="income">Income</option></select></div>
+        <div class="field"><label for="txCategory">Category</label><select id="txCategory"></select></div>
+        <div class="field"><label for="txAmount">Amount (₹)</label><input type="number" id="txAmount" min="1" required></div>
+        <div class="field"><label for="txDate">Date</label><input type="date" id="txDate" required></div>
+        <div class="field"><label for="txNote">Note</label><input type="text" id="txNote" placeholder="Optional"></div>
+        <div class="field" style="display:flex;gap:8px;"><button type="submit" class="btn" id="submitBtn">Add entry</button><button type="button" class="btn ghost" id="cancelEdit" style="display:none;">Cancel</button></div>
+      </form>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>History</h2></div>
+      <div class="filters">
+        <select id="filterType"><option value="">All types</option><option value="income">Income</option><option value="expense">Expense</option></select>
+        <select id="filterCategory"></select>
+        <select id="filterMonth"></select>
+      </div>
+      <table><thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Note</th><th class="right">Amount</th><th></th></tr></thead><tbody id="txBody"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<!-- ================= GOALS ================= -->
+<div id="view-goals" class="app-shell hidden">
+  <aside class="rail">
+    <div class="rail-mark">Budget Planner</div>
+    <div class="rail-sub">User module</div>
+    <nav>
+      <a data-nav="dashboard">Overview</a>
+      <a data-nav="transactions">Transactions</a>
+      <a data-nav="goals" class="active">Goals &amp; summary</a>
+    </nav>
+    <div class="rail-user"><div class="name" data-badge-name>—</div><div class="role" data-badge-role>—</div><button class="btn switch small block" data-logout>Switch Account</button></div>
+  </aside>
+  <main class="main">
+    <div class="page-head"><div><h1>Goals &amp; monthly summary</h1><p>Set a savings target and see how each month closed out.</p></div></div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head"><h2>This month's savings</h2></div>
+        <p class="muted" style="margin:0 0 4px;">Saved so far</p>
+        <h1 class="figure" id="savedFigure">—</h1>
+        <p class="muted" style="margin:2px 0 0;">Goal: <span id="goalFigure">—</span></p>
+        <div class="progress-track"><div class="progress-fill" id="goalProgressFill" style="width:0%"></div></div>
+        <p class="muted" id="goalPct" style="margin:0;"></p>
+        <form id="goalForm" style="margin-top:22px;">
+          <div class="field"><label for="incomeInput">Average monthly income (₹)</label><input type="number" id="incomeInput" min="0"></div>
+          <div class="field"><label for="goalInput">Monthly savings goal (₹)</label><input type="number" id="goalInput" min="0"></div>
+          <button type="submit" class="btn">Save goal</button>
+          <span class="muted" id="savedMsg" style="display:none;margin-left:10px;">Saved.</span>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Monthly summary</h2></div>
+        <table><thead><tr><th>Month</th><th class="right">Income</th><th class="right">Expenses</th><th class="right">Net</th></tr></thead><tbody id="summaryBody"></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div id="view-admin" class="app-shell hidden">
+  <aside class="rail">
+    <div class="rail-mark">Budget Planner</div>
+    <div class="rail-sub">Admin module</div>
+    <nav><a data-nav="admin" class="active">Overview &amp; management</a></nav>
+    <div class="rail-user"><div class="name" data-badge-name>—</div><div class="role" data-badge-role>—</div><button class="btn switch small block" data-logout>Switch Account</button></div>
+  </aside>
+  <main class="main">
+    <div class="page-head"><div><h1>System overview</h1><p>Everyone's spending, at a glance, plus account and category controls.</p></div></div>
+    <div class="summary-row">
+      <div class="summary-cell"><div class="label">Registered users</div><div class="value figure" id="statUsers">—</div></div>
+      <div class="summary-cell"><div class="label">Income (this month)</div><div class="value figure green" id="statIncome">—</div></div>
+      <div class="summary-cell"><div class="label">Expenses (this month)</div><div class="value figure rust" id="statExpense">—</div></div>
+      <div class="summary-cell"><div class="label">Net</div><div class="value figure gold" id="statNet">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="panel"><div class="panel-head"><h2>Spending by category — all users</h2></div>
+        <div class="chart-wrap"><canvas id="adminChart" width="170" height="170"></canvas><div class="legend" id="adminLegend"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Categories</h2></div>
+        <form id="catForm" class="inline-form" style="grid-template-columns:2fr 1fr 1fr;margin-bottom:18px;">
+          <div class="field"><label for="catName">Name</label><input type="text" id="catName" required placeholder="e.g. Travel"></div>
+          <div class="field"><label for="catCap">Monthly cap (₹)</label><input type="number" id="catCap" min="0" placeholder="0 = no cap"></div>
+          <button type="submit" class="btn">Add</button>
+        </form>
+        <table><thead><tr><th>Category</th><th class="right">Cap</th><th></th></tr></thead><tbody id="catBody"></tbody></table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Users</h2></div>
+      <table><thead><tr><th>Name</th><th>Email</th><th class="right">Total income</th><th class="right">Total expenses</th><th></th></tr></thead><tbody id="usersBody"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ================= STORAGE LAYER ================= */
+const DB_KEYS={users:'bp_users',categories:'bp_categories',transactions:'bp_transactions',session:'bp_session'};
+function uid(p){return p+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function readJSON(k,f){try{const r=localStorage.getItem(k);return r?JSON.parse(r):f;}catch(e){return f;}}
+function writeJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function monthsBackDate(monthsBack,day){
+  const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-monthsBack);
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0');
+  return y+'-'+m+'-'+String(day).padStart(2,'0');
+}
+function seedData(){
+  if(localStorage.getItem('bp_seeded_v2'))return;
+  writeJSON('bp_seeded_v2',true);
+  const categories=[
+    {id:uid('cat'),name:'Housing',cap:15000,color:'#1E2A38'},
+    {id:uid('cat'),name:'Food',cap:8000,color:'#3F6E52'},
+    {id:uid('cat'),name:'Transport',cap:4000,color:'#B7893F'},
+    {id:uid('cat'),name:'Utilities',cap:3500,color:'#45566B'},
+    {id:uid('cat'),name:'Health',cap:3000,color:'#8A9AAC'},
+    {id:uid('cat'),name:'Entertainment',cap:2500,color:'#B3492D'},
+    {id:uid('cat'),name:'Other',cap:0,color:'#C9BFA5'}
+  ];
+  writeJSON(DB_KEYS.categories,categories);
+  const admin={id:uid('usr'),name:'Admin',email:'admin@budget.com',password:'admin123',role:'admin',savingsGoal:0,createdAt:new Date().toISOString()};
+  const priya={id:uid('usr'),name:'Priya Sharma',email:'priya@example.com',password:'demo1234',role:'user',monthlyIncome:45000,savingsGoal:8000,createdAt:new Date().toISOString()};
+  const rahul={id:uid('usr'),name:'Rahul Verma',email:'rahul@example.com',password:'demo1234',role:'user',monthlyIncome:35000,savingsGoal:5000,createdAt:new Date().toISOString()};
+  writeJSON(DB_KEYS.users,[admin,priya,rahul]);
+  const tx=[];
+  function add(userId,type,category,amount,monthsBack,day,note){tx.push({id:uid('tx'),userId,type,category,amount,date:monthsBackDate(monthsBack,day),note:note||''});}
+  [2,1,0].forEach(function(mb){
+    add(priya.id,'expense','Housing',15000,mb,2,'Rent');
+    add(priya.id,'expense','Food',5200+mb*150,mb,6,'Groceries');
+    add(priya.id,'expense','Transport',2600,mb,9,'Metro pass');
+    add(priya.id,'expense','Utilities',2900,mb,11,'Electricity + wifi');
+    add(priya.id,'expense','Entertainment',1400,mb,15,'Movies, subscriptions');
+    add(priya.id,'expense','Health',900,mb,18,'Pharmacy');
+  });
+  add(priya.id,'income','Other',6000,1,20,'Freelance design work');
+  add(rahul.id,'expense','Housing',15000,2,3,'Rent');
+  add(rahul.id,'expense','Food',7200,2,8,'Groceries + eating out');
+  add(rahul.id,'expense','Transport',3600,2,10,'Fuel + cab rides');
+  add(rahul.id,'expense','Utilities',3100,2,12,'Electricity + phone');
+  add(rahul.id,'expense','Entertainment',2100,2,16,'Streaming, outings');
+  add(rahul.id,'expense','Housing',15000,1,3,'Rent');
+  add(rahul.id,'expense','Food',8400,1,7,'Groceries + eating out');
+  add(rahul.id,'expense','Transport',4300,1,9,'Fuel + cab rides');
+  add(rahul.id,'expense','Utilities',3400,1,12,'Electricity + phone');
+  add(rahul.id,'expense','Entertainment',2600,1,17,'Streaming, concert');
+  add(rahul.id,'expense','Housing',15000,0,3,'Rent');
+  add(rahul.id,'expense','Food',9500,0,6,'Groceries + eating out');
+  add(rahul.id,'expense','Transport',4500,0,8,'Fuel + cab rides');
+  add(rahul.id,'expense','Utilities',3600,0,10,'Electricity + phone');
+  add(rahul.id,'expense','Entertainment',3200,0,14,'Streaming, weekend trip');
+  add(rahul.id,'expense','Health',2000,0,16,'Dental checkup');
+  writeJSON(DB_KEYS.transactions,tx);
+}
+function getUsers(){return readJSON(DB_KEYS.users,[]);}
+function saveUsers(l){return writeJSON(DB_KEYS.users,l);}
+function findUserByEmail(e){return getUsers().find(u=>u.email.toLowerCase()===String(e).toLowerCase());}
+function findUserById(id){return getUsers().find(u=>u.id===id);}
+function addUser(u){const l=getUsers();l.push(u);saveUsers(l);return u;}
+function updateUser(id,patch){const l=getUsers();const i=l.findIndex(u=>u.id===id);if(i===-1)return null;l[i]=Object.assign({},l[i],patch);saveUsers(l);return l[i];}
+function deleteUser(id){saveUsers(getUsers().filter(u=>u.id!==id));saveTransactions(getTransactions().filter(t=>t.userId!==id));}
+function getCategories(){return readJSON(DB_KEYS.categories,[]);}
+function saveCategories(l){return writeJSON(DB_KEYS.categories,l);}
+function addCategory(c){const l=getCategories();l.push(c);saveCategories(l);return c;}
+function deleteCategory(id){saveCategories(getCategories().filter(c=>c.id!==id));}
+function getTransactions(){return readJSON(DB_KEYS.transactions,[]);}
+function saveTransactions(l){return writeJSON(DB_KEYS.transactions,l);}
+function getUserTransactions(uid_){return getTransactions().filter(t=>t.userId===uid_);}
+function addTransaction(t){const l=getTransactions();l.push(t);saveTransactions(l);return t;}
+function updateTransaction(id,patch){const l=getTransactions();const i=l.findIndex(t=>t.id===id);if(i===-1)return null;l[i]=Object.assign({},l[i],patch);saveTransactions(l);return l[i];}
+function deleteTransaction(id){saveTransactions(getTransactions().filter(t=>t.id!==id));}
+function getSession(){return readJSON(DB_KEYS.session,null);}
+function setSession(userId){writeJSON(DB_KEYS.session,{userId});}
+function clearSession(){localStorage.removeItem(DB_KEYS.session);}
+function currentUser(){const s=getSession();return s?findUserById(s.userId):null;}
+function fmtMoney(n){const num=Number(n)||0;return '₹'+num.toLocaleString('en-IN',{maximumFractionDigits:0});}
+function monthKey(d){return String(d).slice(0,7);}
+function thisMonthKey(){return new Date().toISOString().slice(0,7);}
+function monthLabel(mKey){const [y,m]=mKey.split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});}
+function monthLabelShort(mKey){const [y,m]=mKey.split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('en-US',{month:'short',year:'numeric'});}
+seedData();
+
+/* ================= CHART ================= */
+function drawPieChart(canvasId,legendId,slices){
+  const canvas=document.getElementById(canvasId);const legend=document.getElementById(legendId);
+  if(!canvas)return;const ctx=canvas.getContext('2d');const size=canvas.width;const cx=size/2,cy=size/2,r=size/2-4;
+  ctx.clearRect(0,0,size,size);
+  const total=slices.reduce((s,x)=>s+x.value,0);
+  if(total<=0){
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#EFE9DA';ctx.fill();
+    ctx.fillStyle='#8A9AAC';ctx.font='13px Inter, sans-serif';ctx.textAlign='center';ctx.fillText('No expenses yet',cx,cy+4);
+    if(legend)legend.innerHTML='<div class="muted">Nothing to show this month.</div>';return;
+  }
+  let start=-Math.PI/2;
+  slices.forEach(s=>{const angle=(s.value/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,start+angle);ctx.closePath();ctx.fillStyle=s.color;ctx.fill();start+=angle;});
+  ctx.beginPath();ctx.arc(cx,cy,r*0.55,0,Math.PI*2);ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--paper-raised')||'#fff';ctx.fill();
+  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--ink')||'#1E2A38';ctx.font='600 15px Lora, serif';ctx.textAlign='center';ctx.fillText(fmtMoney(total),cx,cy+3);
+  ctx.font='11px Inter, sans-serif';ctx.fillStyle='#8A9AAC';ctx.fillText('total spent',cx,cy+18);
+  if(legend){legend.innerHTML=slices.map(s=>{const pct=total?Math.round((s.value/total)*100):0;return '<div class="row"><span class="sw" style="background:'+s.color+'"></span><span>'+s.name+' — '+fmtMoney(s.value)+' ('+pct+'%)</span></div>';}).join('');}
+}
+
+/* ================= ROUTER ================= */
+function showView(name){
+  document.querySelectorAll('[id^="view-"]').forEach(v=>v.classList.add('hidden'));
+  document.getElementById('view-'+name).classList.remove('hidden');
+  const user=currentUser();
+  if(user){
+    document.querySelectorAll('[data-badge-name]').forEach(el=>el.textContent=user.name);
+    document.querySelectorAll('[data-badge-role]').forEach(el=>el.textContent=user.role==='admin'?'Administrator':'Account holder');
+  }
+  if(name==='dashboard')renderDashboard();
+  if(name==='transactions')renderTransactionsView();
+  if(name==='goals')renderGoalsView();
+  if(name==='admin')renderAdminView();
+}
+document.addEventListener('click',function(e){
+  const nav=e.target.closest('[data-nav]');
+  if(nav){e.preventDefault();showView(nav.getAttribute('data-nav'));}
+  const logout=e.target.closest('[data-logout]');
+  if(logout){clearSession();showView('home');}
+});
+
+/* ================= AUTH ================= */
+document.getElementById('tabUser').addEventListener('click',()=>setLoginRole('user'));
+document.getElementById('tabAdmin').addEventListener('click',()=>setLoginRole('admin'));
+function setLoginRole(role){
+  document.getElementById('loginRole').value=role;
+  document.getElementById('tabUser').classList.toggle('active',role==='user');
+  document.getElementById('tabAdmin').classList.toggle('active',role==='admin');
+}
+setLoginRole('user');
+document.getElementById('goRegister').addEventListener('click',()=>{document.getElementById('view-login').classList.add('hidden');document.getElementById('view-register').classList.remove('hidden');});
+document.getElementById('goLogin').addEventListener('click',()=>{document.getElementById('view-register').classList.add('hidden');document.getElementById('view-login').classList.remove('hidden');});
+
+document.getElementById('loginForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const errorBox=document.getElementById('loginError');errorBox.classList.remove('show');
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const role=document.getElementById('loginRole').value;
+  const user=findUserByEmail(email);
+  if(!user||user.password!==password){errorBox.textContent="That email or password doesn't match our records.";errorBox.classList.add('show');return;}
+  if(user.role!==role){errorBox.textContent='This account is not registered as '+role+'. Switch tabs and try again.';errorBox.classList.add('show');return;}
+  setSession(user.id);
+  showView(role==='admin'?'admin':'dashboard');
+});
+
+document.getElementById('registerForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const errorBox=document.getElementById('registerError');errorBox.classList.remove('show');
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const password=document.getElementById('regPassword').value;
+  const income=Number(document.getElementById('regIncome').value)||0;
+  if(!name||!email||password.length<4){errorBox.textContent='Fill in every field. Password needs at least 4 characters.';errorBox.classList.add('show');return;}
+  if(findUserByEmail(email)){errorBox.textContent='An account with that email already exists.';errorBox.classList.add('show');return;}
+  const user=addUser({id:uid('usr'),name,email,password,role:'user',monthlyIncome:income,savingsGoal:0,createdAt:new Date().toISOString()});
+  setSession(user.id);
+  showView('dashboard');
+});
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(){
+  const user=currentUser();if(!user)return;
+  const categories=getCategories();
+  const txAll=getUserTransactions(user.id);
+  const mKey=thisMonthKey();
+  const txMonth=txAll.filter(t=>monthKey(t.date)===mKey);
+  const income=txMonth.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0)+(Number(user.monthlyIncome)||0);
+  const expense=txMonth.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const balance=income-expense;
+  document.getElementById('cardIncome').textContent=fmtMoney(income);
+  document.getElementById('cardExpense').textContent=fmtMoney(expense);
+  document.getElementById('cardBalance').textContent=fmtMoney(balance);
+  document.getElementById('cardBalance').className='value figure '+(balance>=0?'green':'rust');
+  const alertBox=document.getElementById('overspendAlert');
+  const byCat={};
+  txMonth.filter(t=>t.type==='expense').forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
+  const overCats=categories.filter(c=>c.cap>0&&(byCat[c.name]||0)>c.cap);
+  if(expense>income){
+    alertBox.className='alert';
+    alertBox.innerHTML='<strong>You are overspending this month.</strong>Expenses ('+fmtMoney(expense)+') have gone past income ('+fmtMoney(income)+').';
+  }else if(overCats.length){
+    alertBox.className='alert';
+    alertBox.innerHTML='<strong>Some categories are over budget.</strong>'+overCats.map(c=>c.name+' ('+fmtMoney(byCat[c.name])+' of '+fmtMoney(c.cap)+')').join(', ')+'.';
+  }else{
+    alertBox.className='alert ok';
+    alertBox.innerHTML='<strong>You are within budget.</strong>Spending is on track for '+monthLabel(mKey)+'.';
+  }
+  const slices=categories.map(c=>({name:c.name,value:byCat[c.name]||0,color:c.color})).filter(s=>s.value>0);
+  drawPieChart('spendChart','spendLegend',slices);
+  const catList=document.getElementById('catBudgetList');
+  catList.innerHTML=categories.map(c=>{
+    const spent=byCat[c.name]||0;const cap=c.cap||0;
+    const pct=cap?Math.min(100,Math.round((spent/cap)*100)):(spent>0?100:0);
+    const over=cap>0&&spent>cap;
+    return '<div class="cat-row"><span class="cat-swatch" style="background:'+c.color+'"></span><span class="cat-name">'+c.name+'</span>'+
+      '<span class="cat-bar-track"><span class="cat-bar-fill'+(over?' over':'')+'" style="width:'+pct+'%"></span></span>'+
+      '<span class="cat-amt">'+fmtMoney(spent)+(cap?' / '+fmtMoney(cap):' / no cap')+'</span></div>';
+  }).join('');
+  const recentBody=document.getElementById('recentTxBody');
+  const recent=txAll.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  if(!recent.length){recentBody.innerHTML='<tr class="empty-row"><td colspan="4">No transactions yet. Add one from the Transactions page.</td></tr>';}
+  else{recentBody.innerHTML=recent.map(t=>{const cls=t.type==='income'?'amt-income':'amt-expense';const sign=t.type==='income'?'+ ':'– ';
+    return '<tr><td>'+t.date+'</td><td>'+t.category+'</td><td>'+(t.note||'—')+'</td><td class="'+cls+' right figure">'+sign+fmtMoney(t.amount)+'</td></tr>';}).join('');}
+}
+
+/* ================= TRANSACTIONS ================= */
+let editingId=null;
+function renderTransactionsView(){
+  const user=currentUser();if(!user)return;
+  populateCategorySelect();
+  populateMonthFilter(user.id);
+  resetTxForm();
+  renderTxTable(user.id);
+}
+function populateCategorySelect(){
+  const cats=getCategories();
+  document.getElementById('txCategory').innerHTML=cats.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join('');
+  document.getElementById('filterCategory').innerHTML='<option value="">All categories</option>'+cats.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join('');
+}
+function populateMonthFilter(userId){
+  const months=Array.from(new Set(getUserTransactions(userId).map(t=>monthKey(t.date)))).sort().reverse();
+  document.getElementById('filterMonth').innerHTML='<option value="">All months</option>'+months.map(m=>'<option value="'+m+'">'+monthLabelShort(m)+'</option>').join('');
+}
+document.getElementById('txForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const user=currentUser();
+  const type=document.getElementById('txType').value;
+  const category=document.getElementById('txCategory').value;
+  const amount=Number(document.getElementById('txAmount').value);
+  const date=document.getElementById('txDate').value;
+  const note=document.getElementById('txNote').value.trim();
+  if(!amount||amount<=0||!date){alert('Enter a valid amount and date.');return;}
+  if(editingId){updateTransaction(editingId,{type,category,amount,date,note});}
+  else{addTransaction({id:uid('tx'),userId:user.id,type,category,amount,date,note});}
+  resetTxForm();
+  populateMonthFilter(user.id);
+  renderTxTable(user.id);
+});
+document.getElementById('cancelEdit').addEventListener('click',resetTxForm);
+document.getElementById('filterType').addEventListener('change',()=>renderTxTable(currentUser().id));
+document.getElementById('filterCategory').addEventListener('change',()=>renderTxTable(currentUser().id));
+document.getElementById('filterMonth').addEventListener('change',()=>renderTxTable(currentUser().id));
+function resetTxForm(){
+  editingId=null;
+  document.getElementById('txForm').reset();
+  document.getElementById('txDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('formTitle').textContent='Add a transaction';
+  document.getElementById('submitBtn').textContent='Add entry';
+  document.getElementById('cancelEdit').style.display='none';
+}
+function renderTxTable(userId){
+  const body=document.getElementById('txBody');
+  const typeF=document.getElementById('filterType').value;
+  const catF=document.getElementById('filterCategory').value;
+  const monthF=document.getElementById('filterMonth').value;
+  let rows=getUserTransactions(userId);
+  if(typeF)rows=rows.filter(t=>t.type===typeF);
+  if(catF)rows=rows.filter(t=>t.category===catF);
+  if(monthF)rows=rows.filter(t=>monthKey(t.date)===monthF);
+  rows=rows.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  if(!rows.length){body.innerHTML='<tr class="empty-row"><td colspan="6">No transactions match these filters.</td></tr>';return;}
+  body.innerHTML=rows.map(t=>{const cls=t.type==='income'?'amt-income':'amt-expense';const sign=t.type==='income'?'+ ':'– ';
+    return '<tr><td>'+t.date+'</td><td class="chip">'+t.type+'</td><td>'+t.category+'</td><td>'+(t.note||'—')+'</td>'+
+      '<td class="'+cls+' right figure">'+sign+fmtMoney(t.amount)+'</td>'+
+      '<td class="actions"><button data-edit="'+t.id+'">Edit</button><button data-del="'+t.id+'">Delete</button></td></tr>';}).join('');
+  body.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',()=>startEditTx(btn.getAttribute('data-edit'))));
+  body.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',()=>{if(confirm('Delete this transaction?')){deleteTransaction(btn.getAttribute('data-del'));renderTxTable(userId);}}));
+}
+function startEditTx(id){
+  const tx=getTransactions().find(t=>t.id===id);if(!tx)return;
+  editingId=id;
+  document.getElementById('txType').value=tx.type;
+  document.getElementById('txCategory').value=tx.category;
+  document.getElementById('txAmount').value=tx.amount;
+  document.getElementById('txDate').value=tx.date;
+  document.getElementById('txNote').value=tx.note||'';
+  document.getElementById('formTitle').textContent='Edit transaction';
+  document.getElementById('submitBtn').textContent='Save changes';
+  document.getElementById('cancelEdit').style.display='inline-block';
+}
+
+/* ================= GOALS ================= */
+function renderGoalsView(){
+  const user=currentUser();if(!user)return;
+  document.getElementById('goalInput').value=user.savingsGoal||'';
+  document.getElementById('incomeInput').value=user.monthlyIncome||'';
+  renderGoalProgress(user);
+  renderGoalSummary(user);
+}
+document.getElementById('goalForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const user=currentUser();
+  const goal=Number(document.getElementById('goalInput').value)||0;
+  const income=Number(document.getElementById('incomeInput').value)||0;
+  const updated=updateUser(user.id,{savingsGoal:goal,monthlyIncome:income});
+  renderGoalProgress(updated);renderGoalSummary(updated);
+  const msg=document.getElementById('savedMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
+});
+function renderGoalProgress(user){
+  const mKey=thisMonthKey();
+  const tx=getUserTransactions(user.id).filter(t=>monthKey(t.date)===mKey);
+  const extraIncome=tx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const income=(Number(user.monthlyIncome)||0)+extraIncome;
+  const saved=income-expense;
+  const goal=Number(user.savingsGoal)||0;
+  document.getElementById('savedFigure').textContent=fmtMoney(saved);
+  document.getElementById('goalFigure').textContent=goal?fmtMoney(goal):'not set';
+  const track=document.getElementById('goalProgressFill');
+  if(goal>0){
+    const pct=Math.max(0,Math.min(100,Math.round((saved/goal)*100)));
+    track.style.width=pct+'%';track.className='progress-fill'+(saved<0?' over':'');
+    document.getElementById('goalPct').textContent=pct+"% of this month's goal";
+  }else{track.style.width='0%';document.getElementById('goalPct').textContent='Set a monthly goal below to track progress.';}
+}
+function renderGoalSummary(user){
+  const tx=getUserTransactions(user.id);
+  const months=Array.from(new Set(tx.map(t=>monthKey(t.date))));
+  months.push(thisMonthKey());
+  const uniqueMonths=Array.from(new Set(months)).sort().reverse().slice(0,6);
+  document.getElementById('summaryBody').innerHTML=uniqueMonths.map(mKey=>{
+    const rows=tx.filter(t=>monthKey(t.date)===mKey);
+    const inc=rows.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0)+(mKey===thisMonthKey()?(Number(user.monthlyIncome)||0):0);
+    const exp=rows.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const net=inc-exp;const cls=net>=0?'amt-income':'amt-expense';
+    return '<tr><td>'+monthLabel(mKey)+'</td><td class="right figure">'+fmtMoney(inc)+'</td><td class="right figure">'+fmtMoney(exp)+'</td><td class="right figure '+cls+'">'+fmtMoney(net)+'</td></tr>';
+  }).join('');
+}
+
+/* ================= ADMIN ================= */
+function renderAdminView(){
+  renderAdminOverview();
+  renderAdminUsers();
+  renderAdminCategories();
+}
+document.getElementById('catForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const name=document.getElementById('catName').value.trim();
+  const cap=Number(document.getElementById('catCap').value)||0;
+  if(!name)return;
+  const palette=['#1E2A38','#3F6E52','#B7893F','#45566B','#8A9AAC','#B3492D','#C9BFA5','#6E4E9E'];
+  addCategory({id:uid('cat'),name,cap,color:palette[Math.floor(Math.random()*palette.length)]});
+  document.getElementById('catForm').reset();
+  renderAdminCategories();renderAdminOverview();
+});
+function renderAdminOverview(){
+  const users=getUsers().filter(u=>u.role==='user');
+  const tx=getTransactions();
+  const mKey=thisMonthKey();
+  const txMonth=tx.filter(t=>monthKey(t.date)===mKey);
+  const totalIncome=txMonth.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0)+users.reduce((s,u)=>s+(Number(u.monthlyIncome)||0),0);
+  const totalExpense=txMonth.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('statUsers').textContent=users.length;
+  document.getElementById('statIncome').textContent=fmtMoney(totalIncome);
+  document.getElementById('statExpense').textContent=fmtMoney(totalExpense);
+  document.getElementById('statNet').textContent=fmtMoney(totalIncome-totalExpense);
+  const categories=getCategories();
+  const byCat={};
+  txMonth.filter(t=>t.type==='expense').forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
+  const slices=categories.map(c=>({name:c.name,value:byCat[c.name]||0,color:c.color})).filter(s=>s.value>0);
+  drawPieChart('adminChart','adminLegend',slices);
+}
+function renderAdminUsers(){
+  const users=getUsers().filter(u=>u.role==='user');
+  const body=document.getElementById('usersBody');
+  if(!users.length){body.innerHTML='<tr class="empty-row"><td colspan="5">No registered users yet.</td></tr>';return;}
+  body.innerHTML=users.map(u=>{
+    const tx=getUserTransactions(u.id);
+    const expense=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const income=tx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0)+(Number(u.monthlyIncome)||0);
+    return '<tr><td>'+u.name+'</td><td>'+u.email+'</td><td class="right figure">'+fmtMoney(income)+'</td><td class="right figure">'+fmtMoney(expense)+'</td>'+
+      '<td class="actions"><button data-del-user="'+u.id+'">Remove</button></td></tr>';
+  }).join('');
+  body.querySelectorAll('[data-del-user]').forEach(btn=>btn.addEventListener('click',()=>{if(confirm('Remove this user and all of their transactions?')){deleteUser(btn.getAttribute('data-del-user'));renderAdminUsers();renderAdminOverview();}}));
+}
+function renderAdminCategories(){
+  const cats=getCategories();
+  const body=document.getElementById('catBody');
+  if(!cats.length){body.innerHTML='<tr class="empty-row"><td colspan="3">No categories yet.</td></tr>';return;}
+  body.innerHTML=cats.map(c=>'<tr><td><span class="cat-swatch" style="display:inline-block;margin-right:8px;background:'+c.color+'"></span>'+c.name+'</td>'+
+    '<td class="right figure">'+(c.cap?fmtMoney(c.cap):'no cap')+'</td>'+
+    '<td class="actions"><button data-del-cat="'+c.id+'">Delete</button></td></tr>').join('');
+  body.querySelectorAll('[data-del-cat]').forEach(btn=>btn.addEventListener('click',()=>{if(confirm('Delete this category?')){deleteCategory(btn.getAttribute('data-del-cat'));renderAdminCategories();}}));
+}
+
+/* ================= INITIAL ROUTE ================= */
+(function init(){
+  const user=currentUser();
+  if(user){showView(user.role==='admin'?'admin':'dashboard');}
+  else{showView('home');}
+})();
+
+</script>
+</body>
+</html>
